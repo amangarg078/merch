@@ -127,23 +127,22 @@ class Command(BaseCommand):
         users = list(User.objects.filter(groups=brand_user_group))
         notes_to_create = []
         for sku in skus_with_notes:
-            for _ in range(random.randint(1, 3)):  # Create 1-3 notes per selected SKU
-                note_text = random.choice([
-                    "Customer feedback indicates strong satisfaction.",
-                    "Consider reviewing product images for better conversion.",
-                    "High return rate, investigate common issues.",
-                    "Marketing campaign for this SKU is performing well.",
-                    "Competitor analysis suggests price adjustment might be needed.",
-                    "Content score is low, needs optimization.",
-                    "Positive reviews are increasing, good sign.",
-                    "Check inventory levels, sales are spiking."
-                ])
-                notes_to_create.append(Note(
-                    sku=sku,
-                    text=note_text,
-                    created_by=random.choice(users),
-                    created_at=timezone.now()
-                ))
+            note_text = random.choice([
+                "Customer feedback indicates strong satisfaction.",
+                "Consider reviewing product images for better conversion.",
+                "High return rate, investigate common issues.",
+                "Marketing campaign for this SKU is performing well.",
+                "Competitor analysis suggests price adjustment might be needed.",
+                "Content score is low, needs optimization.",
+                "Positive reviews are increasing, good sign.",
+                "Check inventory levels, sales are spiking."
+            ])
+            notes_to_create.append(Note(
+                sku=sku,
+                text=note_text,
+                created_by=random.choice(users),  # Cycle through users
+                created_at=timezone.now()
+            ))
 
         Note.objects.bulk_create(notes_to_create)
         self.stdout.write(self.style.SUCCESS(f'Successfully created {len(notes_to_create)} notes.'))

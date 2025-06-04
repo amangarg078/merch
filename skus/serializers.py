@@ -46,9 +46,13 @@ class SKUDetailsSerializer(serializers.ModelSerializer):
         Other authenticated users will see an empty list.
         """
         request = self.context.get('request')
-        if request and request.user.is_authenticated and request.user.groups.filter(name='merch_ops').exists():
-            # If user is in 'merch_ops' group, return all notes
-            return NoteSerializer(obj.notes.all(), many=True, context={'request': request}).data
+        if request and request.user.is_authenticated:
+            if request.user.groups.filter(name='merch_ops').exists():
+                # If user is in 'merch_ops' group, return all notes
+                return NoteSerializer(obj.notes.all(), many=True, context={'request': request}).data
+            
+            if request.user.groups.filter(name='brand_user').exists():
+                return NoteSerializer(obj.notes.filter(created_by=request.user), many=True, context={'request': request}).data
         else:
             # Otherwise, return an empty list
             return []
