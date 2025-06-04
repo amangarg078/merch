@@ -1,0 +1,353 @@
+[
+    {
+      "sku_id": "SKU001",
+      "name": "Laptop Pro 15",
+      "sales": 1250,
+      "return_percentage": 3.5,
+      "content_score": 8.2
+    },
+    {
+      "sku_id": "SKU002",
+      "name": "Wireless Ergonomic Mouse",
+      "sales": 800,
+      "return_percentage": 1.2,
+      "content_score": 9.1
+    },
+    {
+      "sku_id": "SKU003",
+      "name": "Mechanical Keyboard RGB",
+      "sales": 600,
+      "return_percentage": 5.8,
+      "content_score": 7.5
+    },
+    {
+      "sku_id": "SKU004",
+      "name": "USB-C Hub 7-in-1",
+      "sales": 1500,
+      "return_percentage": 2.1,
+      "content_score": 8.9
+    },
+    {
+      "sku_id": "SKU005",
+      "name": "Noise Cancelling Headphones",
+      "sales": 950,
+      "return_percentage": 7.0,
+      "content_score": 6.8
+    },
+    {
+      "sku_id": "SKU006",
+      "name": "Portable SSD 1TB",
+      "sales": 400,
+      "return_percentage": 0.9,
+      "content_score": 9.5
+    },
+    {
+      "sku_id": "SKU007",
+      "name": "Smartwatch Series 5",
+      "sales": 1100,
+      "return_percentage": 10.5,
+      "content_score": 5.3
+    },
+    {
+      "sku_id": "SKU008",
+      "name": "HD Webcam 1080p",
+      "sales": 720,
+      "return_percentage": 4.1,
+      "content_score": 7.9
+    },
+    {
+      "sku_id": "SKU009",
+      "name": "Gaming Monitor 27-inch",
+      "sales": 300,
+      "return_percentage": 12.0,
+      "content_score": 4.5
+    },
+    {
+      "sku_id": "SKU010",
+      "name": "Mesh WiFi System",
+      "sales": 550,
+      "return_percentage": 2.8,
+      "content_score": 8.7
+    },
+    {
+      "sku_id": "SKU011",
+      "name": "External Hard Drive 2TB",
+      "sales": 320,
+      "return_percentage": 2.5,
+      "content_score": 8.5
+    },
+    {
+      "sku_id": "SKU012",
+      "name": "Bluetooth Speaker Mini",
+      "sales": 980,
+      "return_percentage": 3.1,
+      "content_score": 7.8
+    },
+    {
+      "sku_id": "SKU013",
+      "name": "Tablet 10-inch",
+      "sales": 710,
+      "return_percentage": 6.0,
+      "content_score": 6.5
+    },
+    {
+      "sku_id": "SKU014",
+      "name": "Webcam Pro 4K",
+      "sales": 450,
+      "return_percentage": 1.5,
+      "content_score": 9.0
+    },
+    {
+      "sku_id": "SKU015",
+      "name": "Gaming Headset Surround",
+      "sales": 520,
+      "return_percentage": 7.5,
+      "content_score": 7.1
+    },
+    {
+      "sku_id": "SKU016",
+      "name": "Smart Plug 2-Pack",
+      "sales": 1120,
+      "return_percentage": 1.8,
+      "content_score": 8.3
+    },
+    {
+      "sku_id": "SKU017",
+      "name": "Portable Projector",
+      "sales": 280,
+      "return_percentage": 8.0,
+      "content_score": 6.0
+    },
+    {
+      "sku_id": "SKU018",
+      "name": "Fitness Tracker Advanced",
+      "sales": 870,
+      "return_percentage": 9.2,
+      "content_score": 5.9
+    },
+    {
+      "sku_id": "SKU019",
+      "name": "E-Reader Paperwhite",
+      "sales": 630,
+      "return_percentage": 1.9,
+      "content_score": 9.2
+    },
+    {
+      "sku_id": "SKU020",
+      "name": "Robot Vacuum Cleaner",
+      "sales": 350,
+      "return_percentage": 6.5,
+      "content_score": 7.0
+    },
+    {
+      "sku_id": "SKU021",
+      "name": "Smart Light Bulb 4-Pack",
+      "sales": 1300,
+      "return_percentage": 2.0,
+      "content_score": 8.6
+    },
+    {
+      "sku_id": "SKU022",
+      "name": "Action Camera 4K",
+      "sales": 410,
+      "return_percentage": 3.0,
+      "content_score": 8.9
+    },
+    {
+      "sku_id": "SKU023",
+      "name": "Wireless Charging Pad",
+      "sales": 910,
+      "return_percentage": 1.0,
+      "content_score": 8.1
+    },
+    {
+      "sku_id": "SKU024",
+      "name": "Portable Photo Printer",
+      "sales": 210,
+      "return_percentage": 4.5,
+      "content_score": 7.3
+    },
+    {
+      "sku_id": "SKU025",
+      "name": "Smart Doorbell",
+      "sales": 380,
+      "return_percentage": 5.0,
+      "content_score": 6.7
+    },
+    {
+      "sku_id": "SKU026",
+      "name": "Gaming Chair Ergonomic",
+      "sales": 180,
+      "return_percentage": 15.0,
+      "content_score": 5.5
+    },
+    {
+      "sku_id": "SKU027",
+      "name": "USB Microphone Studio",
+      "sales": 670,
+      "return_percentage": 0.8,
+      "content_score": 9.3
+    },
+    {
+      "sku_id": "SKU028",
+      "name": "Smart Thermostat",
+      "sales": 490,
+      "return_percentage": 3.2,
+      "content_score": 7.6
+    },
+    {
+      "sku_id": "SKU029",
+      "name": "Drone with Camera",
+      "sales": 150,
+      "return_percentage": 18.0,
+      "content_score": 4.9
+    },
+    {
+      "sku_id": "SKU030",
+      "name": "Electric Toothbrush Smart",
+      "sales": 780,
+      "return_percentage": 2.3,
+      "content_score": 8.0
+    },
+    {
+      "sku_id": "SKU031",
+      "name": "Home Security Camera",
+      "sales": 530,
+      "return_percentage": 4.8,
+      "content_score": 6.2
+    },
+    {
+      "sku_id": "SKU032",
+      "name": "Wireless Earbuds Pro",
+      "sales": 1050,
+      "return_percentage": 5.5,
+      "content_score": 7.4
+    },
+    {
+      "sku_id": "SKU033",
+      "name": "Portable Blender",
+      "sales": 610,
+      "return_percentage": 1.1,
+      "content_score": 8.8
+    },
+    {
+      "sku_id": "SKU034",
+      "name": "Smart Scale Body Fat",
+      "sales": 420,
+      "return_percentage": 2.9,
+      "content_score": 8.4
+    },
+    {
+      "sku_id": "SKU035",
+      "name": "Gaming Mouse Pad XL",
+      "sales": 890,
+      "return_percentage": 0.7,
+      "content_score": 9.0
+    },
+    {
+      "sku_id": "SKU036",
+      "name": "VR Headset Entry",
+      "sales": 200,
+      "return_percentage": 20.0,
+      "content_score": 5.0
+    },
+    {
+      "sku_id": "SKU037",
+      "name": "Digital Photo Frame",
+      "sales": 310,
+      "return_percentage": 3.0,
+      "content_score": 7.2
+    },
+    {
+      "sku_id": "SKU038",
+      "name": "Smart Water Bottle",
+      "sales": 700,
+      "return_percentage": 1.0,
+      "content_score": 8.1
+    },
+    {
+      "sku_id": "SKU039",
+      "name": "Portable Power Bank",
+      "sales": 1400,
+      "return_percentage": 1.5,
+      "content_score": 9.1
+    },
+    {
+      "sku_id": "SKU040",
+      "name": "Car Dash Cam",
+      "sales": 470,
+      "return_percentage": 4.0,
+      "content_score": 7.7
+    },
+    {
+      "sku_id": "SKU041",
+      "name": "Smart Garden Kit",
+      "sales": 260,
+      "return_percentage": 5.5,
+      "content_score": 6.9
+    },
+    {
+      "sku_id": "SKU042",
+      "name": "Air Purifier Smart",
+      "sales": 330,
+      "return_percentage": 3.8,
+      "content_score": 7.0
+    },
+    {
+      "sku_id": "SKU043",
+      "name": "Coffee Maker Smart",
+      "sales": 580,
+      "return_percentage": 2.5,
+      "content_score": 8.5
+    },
+    {
+      "sku_id": "SKU044",
+      "name": "Electric Scooter",
+      "sales": 90,
+      "return_percentage": 25.0,
+      "content_score": 4.0
+    },
+    {
+      "sku_id": "SKU045",
+      "name": "Smart Lock Entry",
+      "sales": 290,
+      "return_percentage": 4.2,
+      "content_score": 7.5
+    },
+    {
+      "sku_id": "SKU046",
+      "name": "Portable Speaker Waterproof",
+      "sales": 1100,
+      "return_percentage": 2.0,
+      "content_score": 8.3
+    },
+    {
+      "sku_id": "SKU047",
+      "name": "Fitness Smart Rope",
+      "sales": 750,
+      "return_percentage": 1.7,
+      "content_score": 8.0
+    },
+    {
+      "sku_id": "SKU048",
+      "name": "Mini Projector Portable",
+      "sales": 220,
+      "return_percentage": 9.0,
+      "content_score": 6.8
+    },
+    {
+      "sku_id": "SKU049",
+      "name": "Smart Backpack",
+      "sales": 170,
+      "return_percentage": 6.0,
+      "content_score": 7.1
+    },
+    {
+      "sku_id": "SKU050",
+      "name": "Desk Lamp Smart",
+      "sales": 620,
+      "return_percentage": 1.3,
+      "content_score": 8.6
+    }
+  ]
+  
