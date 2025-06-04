@@ -8,11 +8,18 @@ class NoteSerializer(serializers.ModelSerializer):
     Serializer for the Note model.
     Used for displaying and creating notes via the API.
     """
+    created_by_username = serializers.SerializerMethodField() # New field to display username
+
     class Meta:
         model = Note
-        fields = ['id', 'sku', 'text', 'created_at', 'created_by']
-        read_only_fields = ['created_at', 'created_by'] # created_at is set automatically
+        fields = ['id', 'sku', 'text', 'created_at', 'created_by_username']
+        read_only_fields = ['id', 'sku', 'created_at', 'created_by', 'created_by_username'] # created_at and created_by are set automatically
 
+    def get_created_by_username(self, obj):
+        """
+        Returns the username of the user who created the note.
+        """
+        return obj.created_by.username if obj.created_by else 'Anonymous'
 
 class SKUDailyMetricSerializer(serializers.ModelSerializer):
     """
@@ -39,7 +46,7 @@ class SKUDetailsSerializer(serializers.ModelSerializer):
         Other authenticated users will see an empty list.
         """
         request = self.context.get('request')
-        if request and request.user.is_authenticated and (request.user.groups.filter(name='merch_ops').exists() or request.user.is_staff):
+        if request and request.user.is_authenticated and request.user.groups.filter(name='merch_ops').exists():
             # If user is in 'merch_ops' group, return all notes
             return NoteSerializer(obj.notes.all(), many=True, context={'request': request}).data
         else:
@@ -48,7 +55,7 @@ class SKUDetailsSerializer(serializers.ModelSerializer):
     
     def get_daily_metrics(self, obj):
         today = datetime.date.today()
-        start_date = today - datetime.timedelta(days=60)
+        start_date = today - datetime.timedelta(days=7)
 
         daily_metrics_queryset = obj.daily_metrics.filter(date__gte=start_date).order_by('date')
         # Fetch existing daily metrics within the calculated time range

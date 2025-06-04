@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+
+{% block title %}SKU Detail: {{ sku.name }}{% endblock %}
+
+{% block extra_head %}
+    <!-- Chart.js CDN for charting -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom styles for the Vue app */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        #saveStatus {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #6c757d; /* Bootstrap's secondary gray */
+        }
+        #saveStatus.saving {
+            color: #ffc107; /* Bootstrap's warning yellow */
+        }
+        #saveStatus.saved {
+            color: #28a745; /* Bootstrap's success green */
+        }
+        #saveStatus.error {
+            color: #dc3545; /* Bootstrap's danger red */
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="app" class="container my-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{% url 'sku_list' %}" class="btn btn-link text-decoration-none">&larr; Back to Dashboard</a>
+            <div class="auth-status d-flex align-items-center">
+                {% if user.is_authenticated %}
+                    <span>Hello, {{ user.username }}!</span>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-primary ms-3">Log Out</button>
+                    </form>
+                {% else %}
+                    <span>You are not logged in.</span>
+                    <a href="{% url 'login' %}" class="btn btn-sm btn-primary ms-3">Login</a>
+                {% endif %}
+            </div>
+        </div>
+        <!-- The SkuDetailComponent will be rendered here -->
+        <sku-detail-component
+            :user="'{{ request.user.username|escapejs }}'"
+            :sku-id="'{{ skuId }}'"
+            :can-add-note="can_add_note"
+            :is-merch-ops="is_merch_ops"
+        ></sku-detail-component>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Get CSRF token from the form (re-used from previous templates)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Define the SkuDetailComponent
+    const SkuDetailComponent = {
+        delimiters: ['[[', ']]'], // Set custom delimiters for Vue.js
+        props: ['skuId', 'user', 'canAddNote', 'isMerchOps'],
+        template: `
+            <div>
+                <h1 class="text-center mb-2" v-if="sku">[[ sku.name ]]</h1>
+                <h1 class="text-center mb-2" v-else>Loading...</h1>
+                <p class="text-center text-muted lead mb-4">SKU ID: <span class="fw-bold">[[ skuId ]]</span></p>
+
+                <div v-if="loading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading SKU details...</p>
+                </div>
+
+                <div v-else-if="error" class="alert alert-danger text-center py-3" role="alert">
+                    Error: [[ error ]]
+                </div>
+
+                <div v-else-if="sku">
+                    <div class="card p-4 shadow-sm mb-4 bg-light">
+                        <div class="d-flex justify-content-between py-2 border-bottom border-dashed">
+                            <span class="text-muted">Total Sales:</span>
+                            <span class="fw-bold">[[ sku.sales ]]</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom border-dashed">
+                            <span class="text-muted">Return Percentage:</span>
+                            <span class="fw-bold">
+                                <span class="badge" :class="{
+                                    'bg-success': sku.return_percentage < 5,
+                                    'bg-warning text-dark': sku.return_percentage >= 5 && sku.return_percentage < 15,
+                                    'bg-danger': sku.return_percentage >= 15
+                                }">
+                                    [[ sku.return_percentage ]]%
+                                </span>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-muted">Content Score:</span>
+                            <span class="fw-bold">
+                                <span class="badge" :class="{
+                                    'bg-success': sku.content_score > 7,
+                                    'bg-warning text-dark': sku.content_score <= 7 && sku.content_score > 4,
+                                    'bg-danger': sku.content_score <= 4
+                                }">
+                                    [[ sku.content_score ]]
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <h2 class="h4 border-bottom pb-2 mb-3">Sales Performance for the last 7 days</h2>
+                    <div class="chart-container mb-4">
+                        <canvas id="salesChart" ref="salesChartCanvas"></canvas>
+                    </div>
+
+                    <h2 class="h4 border-bottom pb-2 mb-3">Follow-up Notes</h2>
+
+                    <div v-if="sku.notes && sku.notes.length > 0" class="notes-list mb-4">
+                        <div class="card card-body shadow-sm mb-2 bg-light" v-for="note in sku.notes" :key="note.id">
+                            <p class="card-text">[[ note.text ]]</p>
+                            <small class="text-muted">Added on [[ formatDateTime(note.created_at) ]] by [[ note.created_by_username || 'Anonymous' ]]</small>
+                        </div>
+                    </div>
+                    <div v-else class="alert alert-info text-center py-3" role="alert">
+                        No notes for this SKU yet.
+                    </div>
+
+                    <template v-if="canAddNote">
+                        <h2 class="h4 border-bottom pb-2 mb-3">Add a New Note</h2>
+                        <form @submit.prevent="saveNote" class="mb-4">
+                            <div class="mb-3">
+                                <label for="note_text" class="form-label">Note:</label>
+                                <textarea id="note_text" name="note_text" class="form-control" rows="5" required placeholder="Enter your follow-up note here..." v-model="noteText" @input="debounceSaveNote"></textarea>
+                                <div id="saveStatus" class="mt-2" :class="saveStatusClass">[[ saveStatusMessage ]]</div>
+                            </div>
+                            <!-- <button type="submit" class="btn btn-primary">Add Note</button> -->
+                        </form>
+                    </template>
+                    <template v-else>
+                        <p class="text-muted text-center py-3">You do not have permission to add notes for this SKU.</p>
+                    </template>
+                </div>
+            </div>
+        `,
+        data() {
+            return {
+                sku: null,
+                loading: true,
+                error: null,
+                chartInstance: null,
+                noteText: '',
+                currentNoteId: null, // To store the ID of the note being edited/created
+                saveStatusMessage: '',
+                saveStatusClass: '',
+            };
+        },
+        mounted() {
+            this.fetchSkuDetails();
+        },
+        methods: {
+            async fetchSkuDetails() {
+                this.loading = true;
+                this.error = null;
+                try {
+                    const url = `/api/skus/${this.skuId}/`;
+                    const response = await axios.get(url, {
+                        headers: { 'X-CSRFToken': csrftoken },
+                        withCredentials: true
+                    });
+                    this.sku = response.data;
+                    this.$nextTick(() => {
+                        this.renderChart();
+                    });
+                } catch (err) {
+                    console.error('Error fetching SKU details:', err);
+                    this.error = 'Failed to load SKU details. Please try again later.';
+                    if (err.response && err.response.status === 403) {
+                        this.error = 'You are not authorized to view this SKU.';
+                    } else if (err.response && err.response.status === 401) {
+                        this.error = 'Authentication required. Please log in.';
+                        window.location.href = '{% url "login" %}';
+                    }
+                } finally {
+                    this.loading = false;
+                    if (this.canAddNote) {
+                        this.fetchUserNote();
+                    }
+                }
+            },
+            renderChart() {
+                // Access the canvas element using ref
+                const canvasElement = this.$refs.salesChartCanvas;
+
+                if (!canvasElement) {
+                    console.error("Canvas element with ref 'salesChartCanvas' not found.");
+                    return;
+                }
+
+                const ctx = canvasElement.getContext('2d');
+                if (!ctx) {
+                    console.error("2D rendering context not available for canvas.");
+                    return;
+                }
+
+                if (!this.sku || !this.sku.daily_metrics) {
+                    console.warn("No SKU data or daily metrics available to render chart.");
+                    return;
+                }
+
+                // Destroy previous chart instance if it exists to prevent memory leaks and rendering issues
+                if (this.chartInstance) {
+                    this.chartInstance.destroy();
+                }
+
+                const chartLabels = this.sku.daily_metrics.map(m => {
+                    const date = new Date(m.date);
+                    return date.toLocaleDateString();
+                });
+                const chartData = this.sku.daily_metrics.map(m => m.sales_units || 0); // Use 0 for null sales
+
+                this.chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Sales Units',
+                            data: chartData,
+                            backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                            borderColor: 'rgba(79, 70, 229, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: {
+                                display: true,
+                                text: `Sales Performance (Daily)`,
+                                font: { size: 16, weight: 'bold', family: 'Inter, sans-serif' },
+                                color: '#1f2937'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Sales Units', font: { size: 14, family: 'Inter, sans-serif' }, color: '#4b5563' },
+                                ticks: { color: '#6b7280' },
+                                grid: { color: '#e5e7eb' }
+                            },
+                            x: {
+                                title: { display: true, text: 'Day', font: { size: 14, family: 'Inter, sans-serif' }, color: '#4b5563' },
+                                ticks: { color: '#6b7280' },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            },
+            formatDateTime(isoString) {
+                const date = new Date(isoString);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            },
+            async fetchUserNote() {
+                console.log('Fetching user notes for:', this.user, this.sku.notes);
+                const userNotes = this.sku.notes.filter(note => note.created_by_username === this.user);
+                console.log('User notes:', userNotes);
+                if (userNotes && userNotes.length > 0) {
+                    // Assuming notes are already sorted by created_at descending from API
+                    this.noteText = userNotes[0].text;
+                    this.currentNoteId = userNotes[0].id;
+                }
+
+            },
+            debounceSaveNote() {
+                clearTimeout(this.debounceTimer);
+                this.debounceTimer = setTimeout(() => {
+                    this.saveNote();
+                }, 1000); // 1 second debounce
+            },
+            async saveNote() {
+                if (!this.canAddNote) {
+                    this.saveStatusMessage = 'Error: You do not have permission to add notes.';
+                    this.saveStatusClass = 'error';
+                    return;
+                }
+
+                const noteText = this.noteText.trim();
+                if (!noteText) {
+                    this.saveStatusMessage = '';
+                    this.saveStatusClass = '';
+                    return;
+                }
+
+                this.saveStatusMessage = 'Saving...';
+                this.saveStatusClass = 'saving';
+
+                let method = 'POST';
+                let url = `/api/skus/${this.skuId}/notes/`;
+                let body = {
+                    sku: this.sku.id, // Use SKU's numeric ID for the foreign key
+                    text: noteText
+                };
+
+                if (this.currentNoteId) {
+                    method = 'PUT';
+                    url = `/api/notes/${this.currentNoteId}/`;
+                    body = { text: noteText };
+                }
+
+                try {
+                    const response = await axios({
+                        method: method,
+                        url: url,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken,
+                        },
+                        data: body,
+                        withCredentials: true
+                    });
+
+                    if (response.status >= 200 && response.status < 300) {
+                        this.saveStatusMessage = 'Saved!';
+                        this.saveStatusClass = 'saved';
+                        if (method === 'POST') {
+                            this.currentNoteId = response.data.id;
+                            
+                        }
+                        // Re-fetch SKU details to update the notes list
+                        this.fetchSkuDetails();
+                    } else {
+                        const errorData = response.data;
+                        this.saveStatusMessage = `Error: ${errorData.detail || 'Failed to save note.'}`;
+                        this.saveStatusClass = 'error';
+                        console.error('Failed to save note:', errorData);
+                    }
+                } catch (error) {
+                    this.saveStatusMessage = 'Error: Network issue or API unreachable.';
+                    this.saveStatusClass = 'error';
+                    console.error('Network error during save:', error);
+                    if (error.response && error.response.status === 403) {
+                        this.saveStatusMessage = 'Error: You do not have permission to add/edit notes.';
+                    } else if (error.response && error.response.status === 401) {
+                        this.saveStatusMessage = 'Error: Authentication required. Please log in.';
+                        window.location.href = '{% url "login" %}';
+                    }
+                } finally {
+                    setTimeout(() => {
+                        this.saveStatusMessage = '';
+                        this.saveStatusClass = '';
+                    }, 3000);
+                }
+            }
+        }
+    };
+
+    // Main Vue app
+    const app = Vue.createApp({
+        delimiters: ['[[', ']]'], // Keep delimiters for the root app
+        data() {
+            return {
+                user: '{{ request.user.username|escapejs }}',
+                can_add_note: JSON.parse('{{ can_add_note|escapejs }}'),
+                is_merch_ops: JSON.parse('{{ is_merch_ops|escapejs }}'),
+            };
+        }
+    });
+    app.component('sku-detail-component', SkuDetailComponent);
+    app.mount('#app');
+</script>
+{% endblock %}

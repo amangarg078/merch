@@ -16,9 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic.base import RedirectView # Import RedirectView
+from django.contrib.auth import views as auth_views # Import auth views
+from skus.views import SignUpView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')), # Django's built-in auth URLs
     path('', include('skus.urls')),
+
+    # Django Auth URLs
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
+    path('signup/', SignUpView.as_view(), name='signup'),
+
+    # Redirect root URL to SKU list if logged in, or login page if not
+    # This will be handled by LoginRequiredMixin on SKUListView
+    # path('', RedirectView.as_view(pattern_name='sku_list'), name='home'),
 ]

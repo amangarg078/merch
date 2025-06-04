@@ -1,11 +1,23 @@
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.forms import UserCreationForm
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
+import json
 from .serializers import SKUListSerializer, NoteSerializer, SKUDetailsSerializer
 from .models import SKU, Note
+
+
+class SignUpView(CreateView):
+    form_class = UserCreationForm
+    success_url = reverse_lazy('login') # Redirect to login after successful signup
+    template_name = 'registration/signup.html'
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -29,7 +41,7 @@ class SKUListAPIView(generics.ListAPIView):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
     search_fields = ['name']
-    ordering_fields = ['sales', 'return_percentage', 'content_score']
+    ordering_fields = ['name', 'sales', 'return_percentage', 'content_score']
     
     def get_queryset(self):
         """
@@ -37,18 +49,15 @@ class SKUListAPIView(generics.ListAPIView):
         based on URL query parameters.
         """
         queryset = SKU.objects.all()
-        
-        # Filter for high return rate
-        high_return_rate = self.request.query_params.get('high_return_rate', None)
-        if high_return_rate and high_return_rate.lower() == 'true':
-            # Define what 'high' means, e.g., > 5%
-            queryset = queryset.filter(return_percentage__gt=SKU.get_high_return_rate())
 
-        # Filter for low content score
-        low_content_score = self.request.query_params.get('low_content_score', None)
-        if low_content_score and low_content_score.lower() == 'true':
-            # Define what 'low' means, e.g., < 6.0
-            queryset = queryset.filter(content_score__lt=SKU.get_low_content_score())
+        filter_type = self.request.query_params.get('filter_type', None)
+        if filter_type:
+            if filter_type.lower() == 'high_return_rate':
+                # Filter for high return rate
+                queryset = queryset.filter(return_percentage__gt=SKU.get_high_return_rate())
+            elif filter_type.lower() == 'low_content_score':
+                # Filter for low content score
+                queryset = queryset.filter(content_score__lt=SKU.get_low_content_score())
             
         return queryset
 
@@ -93,4 +102,56 @@ class NoteCreateAPIView(generics.CreateAPIView):
         sku = get_object_or_404(SKU, sku_id=sku_id)
         # Set created_by to the current authenticated user
         serializer.save(sku=sku, created_by=self.request.user)
+
+
+class NoteRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+    """
+    API View to retrieve or update a specific note.
+    GET /api/notes/<int:pk>/
+    PATCH /api/notes/<int:pk>/
+    PUT /api/notes/<int:pk>/
+    Users can only retrieve/update notes they created and must be in 'brand_user' group.
+    """
+    queryset = Note.objects.all()
+    serializer_class = NoteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Ensures a user can only retrieve/update notes they created
+        and are in the 'brand_user' group.
+        """
+        user = self.request.user
+        if user.is_authenticated and user.groups.filter(name='brand_user').exists():
+            return self.queryset.filter(created_by=user)
+        return self.queryset.none() # Return empty queryset if not authorized
+
+    def perform_update(self, serializer):
+        """
+        Ensures the note is updated by the correct user.
+        """
+        # The get_queryset already filters by created_by=user,
+        # so we just need to save.
+        serializer.save()
+
+
+class SKUDashboardView(TemplateView):
+    """
+    Dashboard view to list all SKUs.
+    """
+    template_name = 'home.html'
+
+
+class SKUDetailView(LoginRequiredMixin, TemplateView):
+    """
+    Detail view for a specific SKU.
+    """
+    template_name = 'sku_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["skuId"] = self.kwargs.get('sku_id')
+        context["can_add_note"] = json.dumps(self.request.user.groups.filter(name='brand_user').exists())
+        context["is_merch_ops"] = json.dumps(self.request.user.groups.filter(name='merch_ops').exists())
+        return context
 

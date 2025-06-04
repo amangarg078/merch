@@ -2,7 +2,7 @@ import os
 import json
 import random
 from datetime import date, timedelta
-
+from django.utils import timezone
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
 from django.db.models import Sum # Import Sum for aggregation
@@ -28,6 +28,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('Created group: merch_ops'))
 
         self.stdout.write(self.style.SUCCESS('Creating sample users...'))
+        
         brand_user, created = User.objects.get_or_create(username='branduser1', email='brand1@example.com')
         if created:
             brand_user.set_password('password123')
@@ -45,6 +46,23 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('Created merchops1 and added to merch_ops group.'))
         else:
             self.stdout.write(self.style.WARNING('merchops1 already exists.'))
+            
+        admin_user, created = User.objects.get_or_create(username='admin',
+            defaults={
+                'email': 'admin@example.com',
+                'is_staff': True,
+                'is_superuser': True,
+            }
+        )
+        if created:
+            admin_user.set_password('password123')
+            admin_user.save()
+            merch_ops_group.user_set.add(admin_user)
+            brand_user_group.user_set.add(admin_user)
+            self.stdout.write(self.style.SUCCESS('Created admin and added to brand_user and merchops1 group.'))
+        else:
+            self.stdout.write(self.style.WARNING('admin already exists.'))
+
 
         self.stdout.write(self.style.SUCCESS('Loading SKU data from JSON file...'))
 
@@ -62,7 +80,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"An unexpected error occurred while reading the JSON file: {e}"))
             return
 
-        # --- Bulk Create SKUs ---
+        # --- Create SKUs ---
         skus_to_create = []
         for data in skus_data_from_json:
             skus_to_create.append(
@@ -80,7 +98,7 @@ class Command(BaseCommand):
         # Fetch created SKUs to get their IDs for related objects
         sku_map = {sku.sku_id: sku for sku in SKU.objects.all()}
 
-        # --- Bulk Create SKUDailyMetrics ---
+        # --- Create SKUDailyMetrics ---
         daily_metrics_to_create = []
         today = date.today()
         for sku_data_item in skus_data_from_json:
@@ -88,8 +106,8 @@ class Command(BaseCommand):
             if sku_obj:
                 sku_total_sales = sku_data_item.get('sales', 0)
                 if sku_total_sales > 0:
-                    average_daily_sales = sku_total_sales / 365
-                    for i in range(365):
+                    average_daily_sales = sku_total_sales / 8
+                    for i in range(8):
                         current_date = today - timedelta(days=i)
                         daily_sales_units = max(0, round(average_daily_sales + random.uniform(-average_daily_sales * 0.5, average_daily_sales * 0.5)))
                         daily_metrics_to_create.append(
@@ -103,11 +121,13 @@ class Command(BaseCommand):
         SKUDailyMetric.objects.bulk_create(daily_metrics_to_create)
         self.stdout.write(self.style.SUCCESS(f'Successfully created {len(daily_metrics_to_create)} daily metrics in bulk.'))
 
-        # --- Bulk Create Notes ---
+        # --- Create Notes ---
+        skus = list(SKU.objects.all())
+        skus_with_notes = random.sample(skus, k=random.randint(10, len(skus) // 2))
+        users = list(User.objects.filter(groups=brand_user_group))
         notes_to_create = []
-        for sku_obj in sku_map.values():
-            num_notes = random.randint(0, 3)
-            for _ in range(num_notes):
+        for sku in skus_with_notes:
+            for _ in range(random.randint(1, 3)):  # Create 1-3 notes per selected SKU
                 note_text = random.choice([
                     "Customer feedback indicates strong satisfaction.",
                     "Consider reviewing product images for better conversion.",
@@ -118,9 +138,13 @@ class Command(BaseCommand):
                     "Positive reviews are increasing, good sign.",
                     "Check inventory levels, sales are spiking."
                 ])
-                notes_to_create.append(Note(sku=sku_obj, text=note_text))
+                notes_to_create.append(Note(
+                    sku=sku,
+                    text=note_text,
+                    created_by=random.choice(users),
+                    created_at=timezone.now()
+                ))
 
         Note.objects.bulk_create(notes_to_create)
-        self.stdout.write(self.style.SUCCESS(f'Successfully created {len(notes_to_create)} notes in bulk.'))
-
+        self.stdout.write(self.style.SUCCESS(f'Successfully created {len(notes_to_create)} notes.'))
         self.stdout.write(self.style.SUCCESS('Mock data loading complete.'))
