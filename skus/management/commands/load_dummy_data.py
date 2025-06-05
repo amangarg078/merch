@@ -71,6 +71,10 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS('Loading SKU data from JSON file...'))
 
+        if SKU.objects.exists():
+            self.stdout.write(self.style.WARNING('SKU table is not empty. Skipping to avoid duplicates...'))
+            return
+
         if not os.path.exists(self.json_file_path):
             self.stdout.write(self.style.ERROR(f"Error: JSON file not found at {self.json_file_path}"))
             return
