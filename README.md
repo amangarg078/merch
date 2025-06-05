@@ -22,17 +22,24 @@ Follow these steps to get the project up and running on your local machine.
 - pip (Python package installer)
 - Git
 
+Note: If you have Python installed but available as `python3`, replace `python` in all the following commands with `python3`.
+
 ### 1. Clone the Repository
 
 ```
-git clone <repository_url>  
-cd <project_directory>
+git clone https://github.com/amangarg078/merch.git
+cd merch
 ```
 
 ### 2. Create and Activate a Virtual Environment
 
 ```
 python -m venv env
+```
+or
+```
+python3 -m venv env
+
 ```
 
 - On Windows:  
@@ -57,12 +64,22 @@ pip install -r requirements.txt
 ```
 python manage.py migrate
 ```
+or
+```
+python3 manage.py migrate
+
+```
 
 
 ### 5. Load Mock Data
 
 ```
-python manage.py load_mock_data
+python manage.py load_dummy_data
+```
+or
+```
+python3 manage.py load_dummy_data
+
 ```
 
 This does the following:
@@ -78,12 +95,20 @@ This does the following:
 ```
 python manage.py runserver
 ```
+or
+```
+python3 manage.py runserver
+
+```
 
 Visit `http://127.0.0.1:8000/`
 
 ---
 
 ## 2. API Routes and Expected Inputs/Outputs
+
+The following apis will work browser as well as any API tool like Postman, cURL, etc.
+If using browsers, you just need to make sure that you are logged in to the application, headers will be taken care of automatically.
 
 ### 1. List SKUs
 
