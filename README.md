@@ -279,5 +279,6 @@ Key | Value
 DATABASE_URL | The database URL for the database you created above
 SECRET_KEY| Click Generate to get a secure random value
 WEB_CONCURRENCY | 4
+DEBUG | False
 
 That's it! Save your web service to deploy your Django application on Render. It will be live on your `.onrender.com` URL as soon as the build finishes.
