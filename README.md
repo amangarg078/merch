@@ -8,6 +8,7 @@ This project is a web application built with Django (backend) and Vue.js (fronte
 - [API Routes and Expected Inputs/Outputs](#2-api-routes-and-expected-inputsoutputs)
 - [Assumptions Made](#3-assumptions-made)
 - [Next Steps (If More Time)](#4-next-steps-if-more-time)
+- [Deploying on Render](#5-deploying-on-render)
 
 ---
 
@@ -231,3 +232,27 @@ Authorization: Token <your_api_token>
 ### Frontend
 
 - Migrate to full Vue build with Vite/Vue CLI.
+
+
+---
+
+## 4. Deploying on Render
+
+- Create a new **Postgres** database that is remotely accessible. Use Render/Supabase/any cloud service and copy its URL.
+- Create a new **web service** on Render, point it this repo.
+- Select `Python 3` for the Language and set the following properties:
+
+Property | Value
+--- | --- 
+Build command | `./build.sh`
+Start comman | `python -m gunicorn merch.asgi:application -k uvicorn.workers.UvicornWorker`
+
+- Add the following environment variables under Advanced:
+
+Key | Value
+--- | ---
+DATABASE_URL | The database URL for the database you created above
+SECRET_KEY| Click Generate to get a secure random value
+WEB_CONCURRENCY | 4
+
+That's it! Save your web service to deploy your Django application on Render. It will be live on your `.onrender.com` URL as soon as the build finishes.
