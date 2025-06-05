@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.conf import settings
 
 class SKU(models.Model):
     """
@@ -21,11 +21,11 @@ class SKU(models.Model):
     
     @staticmethod
     def get_high_return_rate():
-        return 5.0
+        return getattr(settings, "HIGH_RETURN_RATE", 5.0)
 
     @staticmethod
     def get_low_content_score():
-        return 6.0
+        return getattr(settings, "LOW_CONTENT_SCORE", 6.0)
 
 
 class Note(models.Model):
