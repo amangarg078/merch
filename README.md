@@ -236,7 +236,7 @@ Authorization: Token <your_api_token>
 
 ---
 
-## 4. Deploying on Render
+## 5. Deploying on Render
 
 - Create a new **Postgres** database that is remotely accessible. Use Render/Supabase/any cloud service and copy its URL.
 - Create a new **web service** on Render, point it this repo.
