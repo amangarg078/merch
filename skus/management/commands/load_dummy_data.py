@@ -6,6 +6,8 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
 from django.db.models import Sum # Import Sum for aggregation
+from rest_framework.authtoken.models import Token
+
 from skus.models import SKU, Note, SKUDailyMetric
 
 
@@ -34,9 +36,11 @@ class Command(BaseCommand):
             brand_user.set_password('password123')
             brand_user.save()
             brand_user_group.user_set.add(brand_user)
+
             self.stdout.write(self.style.SUCCESS('Created brand_user1 and added to brand_user group.'))
         else:
             self.stdout.write(self.style.WARNING('branduser1 already exists.'))
+        Token.objects.get_or_create(user=brand_user)
 
         merch_ops_user, created = User.objects.get_or_create(username='merchops1', email='merch1@example.com')
         if created:
@@ -46,6 +50,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('Created merchops1 and added to merch_ops group.'))
         else:
             self.stdout.write(self.style.WARNING('merchops1 already exists.'))
+        Token.objects.get_or_create(user=merch_ops_user)
             
         admin_user, created = User.objects.get_or_create(username='admin',
             defaults={
@@ -62,7 +67,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('Created admin and added to brand_user and merchops1 group.'))
         else:
             self.stdout.write(self.style.WARNING('admin already exists.'))
-
+        Token.objects.get_or_create(user=admin_user)
 
         self.stdout.write(self.style.SUCCESS('Loading SKU data from JSON file...'))
 

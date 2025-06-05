@@ -8,6 +8,7 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework import filters
 import json
 from .serializers import SKUListSerializer, NoteSerializer, SKUDetailsSerializer
@@ -39,6 +40,7 @@ class SKUListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
 
     search_fields = ['name']
     ordering_fields = ['name', 'sales', 'return_percentage', 'content_score']
@@ -70,6 +72,7 @@ class SKUDetailAPIView(generics.RetrieveAPIView):
     serializer_class = SKUDetailsSerializer
     lookup_field = 'sku_id' # Use sku_id from the URL to lookup the SKU
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     
     def get_serializer_context(self):
         """
@@ -87,6 +90,7 @@ class NoteCreateAPIView(generics.CreateAPIView):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
 
     def perform_create(self, serializer):
         """
@@ -115,6 +119,7 @@ class NoteRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
 
     def get_queryset(self):
         """
